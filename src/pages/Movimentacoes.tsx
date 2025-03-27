@@ -302,7 +302,7 @@ const Movimentacoes = () => {
                               onValueChange={setVehicleSearch}
                             />
                             <CommandEmpty>Nenhum veículo encontrado</CommandEmpty>
-                            {filteredVehicles.length > 0 && (
+                            {filteredVehicles && filteredVehicles.length > 0 && (
                               <CommandGroup>
                                 {filteredVehicles.map((veiculo) => (
                                   <CommandItem
