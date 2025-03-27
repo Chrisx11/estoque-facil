@@ -101,9 +101,12 @@ const Movimentacoes = () => {
     (movimentacao.numeroDocumento && movimentacao.numeroDocumento.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const filteredVehicles = veiculosMock.filter((veiculo) =>
-    veiculo.placa.toLowerCase().includes(vehicleSearch.toLowerCase())
-  );
+  // Ensure filteredVehicles never returns undefined
+  const filteredVehicles = vehicleSearch.trim() === "" 
+    ? veiculosMock 
+    : veiculosMock.filter((veiculo) =>
+        veiculo.placa.toLowerCase().includes(vehicleSearch.toLowerCase())
+      );
 
   const handleSalvar = () => {
     const produto = produtosMock.find(p => p.id === novaMovimentacao.produtoId);
@@ -299,20 +302,22 @@ const Movimentacoes = () => {
                               onValueChange={setVehicleSearch}
                             />
                             <CommandEmpty>Nenhum veículo encontrado</CommandEmpty>
-                            <CommandGroup>
-                              {filteredVehicles.map((veiculo) => (
-                                <CommandItem
-                                  key={veiculo.id}
-                                  value={veiculo.id}
-                                  onSelect={(value) => {
-                                    handleSelectChange("veiculoId", value);
-                                    setVehiclePopoverOpen(false);
-                                  }}
-                                >
-                                  {veiculo.placa} - {veiculo.modelo} ({veiculo.marca})
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
+                            {filteredVehicles.length > 0 && (
+                              <CommandGroup>
+                                {filteredVehicles.map((veiculo) => (
+                                  <CommandItem
+                                    key={veiculo.id}
+                                    value={veiculo.id}
+                                    onSelect={(value) => {
+                                      handleSelectChange("veiculoId", value);
+                                      setVehiclePopoverOpen(false);
+                                    }}
+                                  >
+                                    {veiculo.placa} - {veiculo.modelo} ({veiculo.marca})
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
                           </Command>
                         </PopoverContent>
                       </Popover>
