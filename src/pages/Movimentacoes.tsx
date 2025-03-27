@@ -19,8 +19,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, RefreshCw, Filter } from "lucide-react";
-import { movimentacoesMock, produtosMock, colaboradoresMock } from "@/data/mockData";
-import { Movimentacao, Produto, Colaborador } from "@/types";
+import { movimentacoesMock, produtosMock, colaboradoresMock, veiculosMock } from "@/data/mockData";
+import { Movimentacao, Produto, Colaborador, Veiculo } from "@/types";
 import { 
   Dialog, 
   DialogContent, 
@@ -41,11 +41,25 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const Movimentacoes = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>(movimentacoesMock);
   const [isOpen, setIsOpen] = useState(false);
+  const [vehicleSearch, setVehicleSearch] = useState("");
+  const [vehiclePopoverOpen, setVehiclePopoverOpen] = useState(false);
   
   // Formulário para nova movimentação
   const [novaMovimentacao, setNovaMovimentacao] = useState({
@@ -54,7 +68,7 @@ const Movimentacoes = () => {
     quantidade: 1,
     responsavelId: "",
     observacao: "",
-    numeroDocumento: "",
+    veiculoId: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -87,12 +101,22 @@ const Movimentacoes = () => {
     (movimentacao.numeroDocumento && movimentacao.numeroDocumento.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  const filteredVehicles = veiculosMock.filter((veiculo) =>
+    veiculo.placa.toLowerCase().includes(vehicleSearch.toLowerCase())
+  );
+
   const handleSalvar = () => {
     const produto = produtosMock.find(p => p.id === novaMovimentacao.produtoId);
     const responsavel = colaboradoresMock.find(c => c.id === novaMovimentacao.responsavelId);
+    const veiculo = veiculosMock.find(v => v.id === novaMovimentacao.veiculoId);
 
     if (!produto || !responsavel) {
       toast.error("Por favor, selecione produto e responsável");
+      return;
+    }
+
+    if (!veiculo && novaMovimentacao.tipo === "entrada") {
+      toast.error("Por favor, selecione um veículo");
       return;
     }
 
@@ -116,7 +140,7 @@ const Movimentacoes = () => {
       responsavel: responsavel,
       dataMovimentacao: new Date().toISOString(),
       observacao: novaMovimentacao.observacao,
-      numeroDocumento: novaMovimentacao.numeroDocumento,
+      numeroDocumento: veiculo ? veiculo.placa : undefined,
     };
 
     setMovimentacoes([novoRegistro, ...movimentacoes]);
@@ -148,7 +172,7 @@ const Movimentacoes = () => {
       quantidade: 1,
       responsavelId: "",
       observacao: "",
-      numeroDocumento: "",
+      veiculoId: "",
     });
     
     setIsOpen(false);
@@ -251,14 +275,47 @@ const Movimentacoes = () => {
 
                   {novaMovimentacao.tipo === "entrada" && (
                     <div className="grid gap-2">
-                      <Label htmlFor="numeroDocumento">Número do Documento</Label>
-                      <Input
-                        id="numeroDocumento"
-                        name="numeroDocumento"
-                        value={novaMovimentacao.numeroDocumento}
-                        onChange={handleInputChange}
-                        placeholder="Ex: NF-12345"
-                      />
+                      <Label htmlFor="veiculo">Veículo</Label>
+                      <Popover open={vehiclePopoverOpen} onOpenChange={setVehiclePopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={vehiclePopoverOpen}
+                            className="justify-between w-full font-normal"
+                          >
+                            {novaMovimentacao.veiculoId ? (
+                              veiculosMock.find((veiculo) => veiculo.id === novaMovimentacao.veiculoId)?.placa
+                            ) : (
+                              "Selecione um veículo"
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput 
+                              placeholder="Buscar pela placa..." 
+                              value={vehicleSearch}
+                              onValueChange={setVehicleSearch}
+                            />
+                            <CommandEmpty>Nenhum veículo encontrado</CommandEmpty>
+                            <CommandGroup>
+                              {filteredVehicles.map((veiculo) => (
+                                <CommandItem
+                                  key={veiculo.id}
+                                  value={veiculo.id}
+                                  onSelect={(value) => {
+                                    handleSelectChange("veiculoId", value);
+                                    setVehiclePopoverOpen(false);
+                                  }}
+                                >
+                                  {veiculo.placa} - {veiculo.modelo} ({veiculo.marca})
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   )}
 
@@ -284,7 +341,7 @@ const Movimentacoes = () => {
                         quantidade: 1,
                         responsavelId: "",
                         observacao: "",
-                        numeroDocumento: "",
+                        veiculoId: "",
                       });
                     }}
                   >
@@ -322,7 +379,7 @@ const Movimentacoes = () => {
                   <TableHead>Produto</TableHead>
                   <TableHead>Quantidade</TableHead>
                   <TableHead>Responsável</TableHead>
-                  <TableHead>Documento</TableHead>
+                  <TableHead>Veículo</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
