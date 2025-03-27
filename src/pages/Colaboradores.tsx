@@ -57,7 +57,6 @@ const Colaboradores = () => {
     nome: "",
     cargo: "",
     departamento: "",
-    email: "",
     telefone: "",
   });
 
@@ -80,7 +79,7 @@ const Colaboradores = () => {
     if (editingColaborador) {
       // Editando colaborador existente
       const updatedColaboradores = colaboradores.map(c => 
-        c.id === editingColaborador.id ? {...editingColaborador, ...novoColaborador} : c
+        c.id === editingColaborador.id ? {...editingColaborador, ...novoColaborador, email: editingColaborador.email} : c
       );
       setColaboradores(updatedColaboradores);
       toast.success("Colaborador atualizado com sucesso!");
@@ -92,7 +91,7 @@ const Colaboradores = () => {
         nome: novoColaborador.nome,
         cargo: novoColaborador.cargo,
         departamento: novoColaborador.departamento,
-        email: novoColaborador.email,
+        email: "", // Mantém o campo vazio
         telefone: novoColaborador.telefone,
         dataCadastro: new Date().toISOString().split('T')[0],
         status: "ativo"
@@ -105,7 +104,6 @@ const Colaboradores = () => {
       nome: "",
       cargo: "",
       departamento: "",
-      email: "",
       telefone: "",
     });
     setEditingColaborador(null);
@@ -118,7 +116,6 @@ const Colaboradores = () => {
       nome: colaborador.nome,
       cargo: colaborador.cargo,
       departamento: colaborador.departamento,
-      email: colaborador.email,
       telefone: colaborador.telefone,
     });
     setIsOpen(true);
@@ -191,17 +188,6 @@ const Colaboradores = () => {
                       </div>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={novoColaborador.email}
-                        onChange={handleInputChange}
-                        placeholder="email@empresa.com"
-                      />
-                    </div>
-                    <div className="grid gap-2">
                       <Label htmlFor="telefone">Telefone</Label>
                       <Input
                         id="telefone"
@@ -223,7 +209,6 @@ const Colaboradores = () => {
                         nome: "",
                         cargo: "",
                         departamento: "",
-                        email: "",
                         telefone: "",
                       });
                     }}
@@ -260,7 +245,7 @@ const Colaboradores = () => {
                   <TableHead>Nome</TableHead>
                   <TableHead>Cargo</TableHead>
                   <TableHead>Departamento</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[100px]">Ações</TableHead>
                 </TableRow>
@@ -278,7 +263,7 @@ const Colaboradores = () => {
                       <TableCell className="font-medium">{colaborador.nome}</TableCell>
                       <TableCell>{colaborador.cargo}</TableCell>
                       <TableCell>{colaborador.departamento}</TableCell>
-                      <TableCell>{colaborador.email}</TableCell>
+                      <TableCell>{colaborador.telefone}</TableCell>
                       <TableCell>
                         <Badge variant={colaborador.status === "ativo" ? "outline" : "secondary"} className={
                           colaborador.status === "ativo" 
